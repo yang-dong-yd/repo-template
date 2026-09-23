@@ -1,8 +1,10 @@
 # AGENTS.md
 
-Operating rules for agents working in this repository. They are mandatory, not advisory. They assume the repository is hosted on GitHub; where it has no GitHub remote, the GitHub-specific steps do not apply.
+Operating rules for agents working in this repository. They are mandatory, not advisory.
 
 ## 1. Git Workflow
+
+These rules assume the repository is hosted on GitHub. Where it has no GitHub remote, the GitHub-specific steps (PRs, issues, releases) do not apply.
 
 **Never modify code directly on the default branch.** Always create a new branch first.
 
