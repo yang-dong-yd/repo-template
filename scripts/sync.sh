@@ -55,6 +55,8 @@ if [[ -z "$(git -C "$TARGET" status --porcelain)" ]]; then
   exit 0
 fi
 
+echo "next: copy examples/ci.yml to .github/workflows/ci.yml and set the test command"
+
 git -C "$TARGET" add -A
 git -C "$TARGET" commit -m "chore: sync repository standards"
 git -C "$TARGET" push -u origin "$BRANCH" --force-with-lease

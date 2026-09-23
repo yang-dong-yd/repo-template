@@ -1,0 +1,39 @@
+# A job fragment, not a workflow. It reads `needs.release.outputs.new_tag`, so it
+# must live in the same file as the `release` job: paste it into the `jobs:` map of
+# the repository's `.github/workflows/release.yml`, next to `release` and `publish`.
+#
+# Replace the build step with the packaging tool the project uses. Examples:
+#   deb / rpm / apk   nfpm package --packager deb --target "dist/app_${VERSION#v}_amd64.deb"
+#   Rust              cargo deb
+#   Debian-native     dpkg-buildpackage -b
+#   plain archive     tar -czf "dist/app-${VERSION#v}.tar.gz" ./bin/app
+#   container image   docker build -t ghcr.io/${{ github.repository }}:"${VERSION#v}" .
+#
+# For more than one architecture, add:
+#   strategy:
+#     matrix:
+#       arch: [amd64, arm64]
+# and use `${{ matrix.arch }}` in the build step.
+
+  package:
+    needs: release
+    if: needs.release.outputs.new_tag != ''
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write # attach artifacts to the GitHub release
+    env:
+      VERSION: ${{ needs.release.outputs.new_tag }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build artifacts
+        run: |
+          mkdir -p dist
+          echo "::error::no packaging step configured; see examples/package.yml"
+          exit 1
+
+      - name: Attach artifacts to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "$VERSION" dist/* --clobber

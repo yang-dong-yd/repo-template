@@ -1,0 +1,50 @@
+# Copy this file into a repository as `.github/workflows/ci.yml`, then replace the
+# toolchain and test placeholders.
+#
+# Keep tests in their own workflow: they run on pull requests, while the release
+# workflow runs on pushes to the default branch. Mixing the two means a broken
+# release blocks a pull request, or the reverse.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true # a superseded pull request run is pointless
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Install the project's toolchain here, for example:
+      #   - uses: actions/setup-node@v4
+      #     with: { node-version: 22 }
+      #   - uses: actions/setup-python@v5
+      #     with: { python-version: "3.12" }
+      #   - uses: dtolnay/rust-toolchain@stable
+      #   - uses: actions/setup-go@v5
+      #     with: { go-version: "1.23" }
+
+      # Run the project's test suite here, for example:
+      #   npm ci && npm test
+      #   pip install -e ".[test]" && pytest
+      #   cargo test --all-features
+      #   go test ./...
+      #
+      # Until this is replaced the job fails on purpose: a green check that ran no
+      # tests is worse than a red one.
+      - name: Test
+        run: |
+          echo "::error::no test command configured; see examples/ci.yml"
+          exit 1

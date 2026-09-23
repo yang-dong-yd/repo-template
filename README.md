@@ -15,6 +15,8 @@ pipeline (semantic-release, driven by Conventional Commit prefixes).
 | `.github/workflows/release.yml` | the release pipeline: version, tag, GitHub release — no build | **called** as a reusable workflow, never copied |
 | `.github/workflows/release-self.yml` | releases this repository itself | stays here |
 | `examples/caller-release.yml` | the caller stub | copied once into each repository |
+| `examples/ci.yml` | minimal pull request gate: build and test | copied once into each repository |
+| `examples/package.yml` | job fragment that builds artifacts and attaches them to the release | pasted into a repository's `release.yml` |
 | `scripts/sync.sh` | syncs the copied files and opens a PR | run from here |
 
 ## Adopting in a new repository
@@ -54,6 +56,34 @@ Two consequences worth knowing:
 
 The Node runtime in the shared workflow is the runtime of the semantic-release
 tool itself; it never touches the project's own `package.json` or `node_modules`.
+
+## Tests run in their own workflow
+
+`examples/ci.yml` is a minimal pull request gate, copied to
+`.github/workflows/ci.yml`. It is deliberately separate from `release.yml`: tests
+run on pull requests, releases run on pushes to the default branch. Replace the
+toolchain and test command placeholders.
+
+The testing rules in `AGENTS.md` only bind if the repository enforces them: in the
+branch protection rule or ruleset for the default branch, require the `test` status
+check before merging.
+
+`scripts/sync.sh` does not install this file — the test command cannot be guessed,
+and the placeholder fails on purpose rather than reporting a green run that tested
+nothing.
+
+## Packaging belongs to the repository
+
+`examples/package.yml` is a job fragment, not a workflow: it reads
+`needs.release.outputs.new_tag`, so it must sit in the same file as the `release`
+job. Paste it into that repository's `.github/workflows/release.yml`.
+
+It builds into `dist/` and attaches the files to the GitHub release. Replace the
+build step with the project's own tool — `nfpm` for deb/rpm/apk, `cargo deb` for
+Rust, `dpkg-buildpackage` for Debian-native packages, `tar` for plain archives,
+`docker build`/`push` for images. GitHub Packages hosts npm, Docker, Maven, NuGet,
+Gradle and RubyGems; deb and rpm have to go to the release assets or to a separate
+apt or yum repository.
 
 ## Keeping repositories up to date
 
