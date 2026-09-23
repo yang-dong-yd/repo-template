@@ -1,0 +1,45 @@
+name: Auto Semantic Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write # required to push the tag and create the release
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false # never cancel a release mid-flight
+
+jobs:
+  release:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history and tags
+
+      - name: Auto Tag
+        id: tagger
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: false # docs/chore/refactor-only merges must not cut a release
+          # A repository with no tag at all can never cut a first release: the
+          # action has nothing to diff against. Push a baseline tag once when the
+          # repository is created: git tag v0.0.0 && git push origin v0.0.0
+
+      # Create a Release only when a new tag was produced
+      - name: Create GitHub Release
+        if: steps.tagger.outputs.new_tag != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_TAG: ${{ steps.tagger.outputs.new_tag }}
+          CHANGELOG: ${{ steps.tagger.outputs.changelog }}
+        run: |
+          gh release create "$NEW_TAG" \
+            --title "Release $NEW_TAG" \
+            --notes "$CHANGELOG"
