@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Operating rules for agents working in this repository. They are mandatory, not advisory.
+Operating rules for agents working in this repository. They are mandatory, not advisory. They assume the repository is hosted on GitHub; where it has no GitHub remote, the GitHub-specific steps do not apply.
 
 ## 1. Git Workflow
 
@@ -86,10 +86,10 @@ Every commit message follows Conventional Commits:
 
 ## 4. Required Tooling
 
-- Use `git` for all version control operations.
+- **`git` is always required.** Use it for all version control operations. If it is missing, stop and tell the user to install it, including the command for their platform. Do not install tooling unless the user approves.
+- **`gh` is required whenever the repository has a GitHub remote** (detect with `git remote -v`). If it is missing, stop and tell the user to install it; the PR, issue, and release steps cannot be completed without it.
 - Use `gh` for all GitHub operations: repositories, issues, PRs, reviews, releases, CI status.
 - Do not call the GitHub API with `curl` or `wget` when `gh` can do the job.
-- **If `git` or `gh` is not installed, stop and tell the user to install it**, including the suggested install command. Do not install tooling unless the user approves.
 - Confirm authentication with `gh auth status` before GitHub operations; if unauthenticated, tell the user to run `gh auth login`.
 
 ## 5. Reporting
