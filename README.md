@@ -12,7 +12,7 @@ pipeline (semantic-release, driven by Conventional Commit prefixes).
 |---|---|---|
 | `AGENTS.md` | operating rules for agents | copied into each repository root |
 | `.releaserc.json` | semantic-release configuration | copied once, then extended per repository |
-| `.github/workflows/release.yml` | the release pipeline | **called** as a reusable workflow, never copied |
+| `.github/workflows/release.yml` | the release pipeline: version, tag, GitHub release — no build | **called** as a reusable workflow, never copied |
 | `.github/workflows/release-self.yml` | releases this repository itself | stays here |
 | `examples/caller-release.yml` | the caller stub | copied once into each repository |
 | `scripts/sync.sh` | syncs the copied files and opens a PR | run from here |
@@ -33,8 +33,27 @@ scripts/sync.sh ../some-repo
 
 This copies `AGENTS.md`, adds `.releaserc.json` and the release workflow when they
 are missing, pushes a branch, and opens a PR. Review the diff and merge it with
-squash. If the repository publishes to npm, add `@semantic-release/npm` to its
-`.releaserc.json` and define the `NPM_TOKEN` secret.
+squash. Then fill in the `publish` job of `.github/workflows/release.yml` for that
+repository's language, or delete the job if it publishes nothing.
+
+## Releasing and publishing are separate
+
+The shared workflow is deliberately language-agnostic. It computes the version,
+creates the tag, and creates the GitHub release, then exposes the tag as
+`new_tag`. Building and publishing the artifact is language-specific, so it lives
+in the `publish` job of each repository's own caller stub.
+
+Two consequences worth knowing:
+
+- **Registry secrets stay out of the shared workflow.** `NPM_TOKEN`,
+  `PYPI_TOKEN`, `CARGO_REGISTRY_TOKEN` and friends are defined in the repository
+  that publishes, never here.
+- **A tag pushed with `GITHUB_TOKEN` does not trigger a new workflow run**, so a
+  separate `on: push: tags` publish workflow would never fire. Chain the publish
+  job with `needs:`, which is what the example does.
+
+The Node runtime in the shared workflow is the runtime of the semantic-release
+tool itself; it never touches the project's own `package.json` or `node_modules`.
 
 ## Keeping repositories up to date
 

@@ -80,7 +80,7 @@ Every commit message follows Conventional Commits:
 
 ## 3. Versioning and Releases
 
-- Releases are automated by `semantic-release` in the `Release` workflow (`.github/workflows/release.yml`) on every push to `<default-branch>`: it computes the next version from the commit prefixes, creates the tag, creates the GitHub release, and publishes the package.
+- Releases are automated by `semantic-release` in the `Release` workflow (`.github/workflows/release.yml`) on every push to `<default-branch>`: it computes the next version from the commit prefixes, creates the tag, and creates the GitHub release. Publishing is a separate, language-specific `publish` job in the same workflow, and it is skipped when nothing was released.
 - The release level is determined by the merged commit prefix: `feat` → minor, `fix`/`perf` → patch, `BREAKING CHANGE:` → major. Every other type (`docs`, `style`, `refactor`, `test`, `build`, `ci`, `chore`) produces no release. An incorrect prefix therefore ships an incorrect version.
 - The release job never commits to `<default-branch>`. Do not add `@semantic-release/git` to `.releaserc.json`.
 - Because nothing is committed back, the version field in the manifest (`package.json`, `pyproject.toml`, `Cargo.toml`) stays at its placeholder, `0.0.0-semantic-release`, and CI overwrites it only in the publish workspace. Never edit that field and never treat it as the current version; the git tag is the only source of truth.

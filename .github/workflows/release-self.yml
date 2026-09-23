@@ -22,13 +22,14 @@ concurrency:
 jobs:
   release:
     uses: ./.github/workflows/release.yml
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   # Callers pin `@v1`; without this, every release would need a manual force-push
   # and a forgotten one would silently pin downstream repositories to old logic.
+  # This job is also the template's own proof that the `new_tag` output crosses
+  # the reusable-workflow boundary correctly.
   major-tag:
     needs: release
+    if: needs.release.outputs.new_tag != ''
     runs-on: ubuntu-22.04
     permissions:
       contents: write
@@ -39,14 +40,11 @@ jobs:
           fetch-depth: 0
 
       - name: Point the major tag at the newest release
+        env:
+          NEW_TAG: ${{ needs.release.outputs.new_tag }}
         run: |
           set -euo pipefail
-          tag="$(git tag --points-at HEAD --list 'v[0-9]*.[0-9]*.[0-9]*' | sort -V | tail -1)"
-          if [[ -z "$tag" ]]; then
-            echo "no release tag on this commit; leaving the major tag alone"
-            exit 0
-          fi
-          major="${tag%%.*}"
-          git tag -f "$major" "$tag"
+          major="${NEW_TAG%%.*}"
+          git tag -f "$major" "$NEW_TAG"
           git push -f origin "$major"
-          echo "moved $major to $tag"
+          echo "moved $major to $NEW_TAG"

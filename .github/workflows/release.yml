@@ -1,9 +1,14 @@
 name: Release
 
-# Reusable release workflow. Downstream repositories call this instead of copying
-# the release logic, so a fix here reaches every repository at once.
+# Reusable release workflow, language-agnostic on purpose: it computes the next
+# version from the commit prefixes, creates the tag, and creates the GitHub
+# release. It never builds or publishes anything - that is the calling
+# repository's job (see the `publish` job in examples/caller-release.yml).
 #
-# Caller (see examples/caller-release.yml):
+# Node is only the runtime of the semantic-release tool; this workflow never
+# touches the project's own package.json or node_modules.
+#
+# Caller:
 #
 #   jobs:
 #     release:
@@ -12,14 +17,17 @@ name: Release
 #         issues: write
 #         pull-requests: write
 #       uses: <owner>/repo-template/.github/workflows/release.yml@v1
-#       secrets:
-#         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+#     publish:
+#       needs: release
+#       if: needs.release.outputs.new_tag != ''
+#       ...
 
 on:
   workflow_call:
-    secrets:
-      NPM_TOKEN:
-        required: false # only repositories that publish to npm define this
+    outputs:
+      new_tag:
+        description: "Tag created by this run, or an empty string when nothing was released"
+        value: ${{ jobs.release.outputs.new_tag }}
 
 permissions:
   contents: write # create the tag and the GitHub release
@@ -29,6 +37,8 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-22.04
+    outputs:
+      new_tag: ${{ steps.detect.outputs.new_tag }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -44,5 +54,19 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx --yes semantic-release@25
+
+      # semantic-release tags the release commit locally, so the new tag can be
+      # read straight from the checkout. Downstream jobs use it to decide whether
+      # there is anything to publish.
+      - name: Detect the new tag
+        id: detect
+        run: |
+          set -euo pipefail
+          tag="$(git tag --points-at HEAD --list 'v[0-9]*.[0-9]*.[0-9]*' | sort -V | tail -1)"
+          echo "new_tag=$tag" >> "$GITHUB_OUTPUT"
+          if [[ -n "$tag" ]]; then
+            echo "released $tag"
+          else
+            echo "nothing released"
+          fi
