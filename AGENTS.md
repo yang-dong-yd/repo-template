@@ -80,10 +80,11 @@ Every commit message follows Conventional Commits:
 
 ## 3. Versioning and Releases
 
-- Releases are automated by the `Auto Semantic Release` workflow (`.github/workflows/main.yml`): it reads the commit prefixes on `<default-branch>`, pushes the next tag, and creates the GitHub release. Version analysis follows semantic-release's commit analyzer.
+- Releases are automated by `semantic-release` in the `Release` workflow (`.github/workflows/main.yml`) on every push to `<default-branch>`: it computes the next version from the commit prefixes, creates the tag, creates the GitHub release, and publishes the package.
 - The release level is determined by the merged commit prefix: `feat` → minor, `fix`/`perf` → patch, `BREAKING CHANGE:` → major. Every other type (`docs`, `style`, `refactor`, `test`, `build`, `ci`, `chore`) produces no release. An incorrect prefix therefore ships an incorrect version.
-- **A repository with no tag at all never produces a first release**, because the workflow has no baseline to compare against. Push a `v0.0.0` tag once when the repository is created, before the first feature merge.
-- Apart from that one-time baseline, **never create or push tags, edit version numbers, `CHANGELOG.md`, or GitHub releases by hand**. The workflow owns them.
+- The release job never commits to `<default-branch>`. Do not add `@semantic-release/git` to `.releaserc.json`.
+- **Never tag, publish, or edit releases by hand** — no `git tag`, `npm publish`, `twine upload`, `cargo publish`, `docker push`, or `gh release create`, and no hand edits to version numbers or `CHANGELOG.md`. The release workflow owns all of that, including the registry credentials.
+- A repository with no tag yet publishes `1.0.0` as its first release. To start at `0.x` instead, push a `v0.0.0` tag once before the first merge.
 
 ## 4. Required Tooling
 
