@@ -6,10 +6,15 @@ This repository is the source of truth for two things that must not drift betwee
 repositories: the operating rules agents follow (`AGENTS.md`) and the release
 pipeline (semantic-release, driven by Conventional Commit prefixes).
 
+**If you are an agent asked to apply these standards to another repository, follow
+[`INTEGRATION.md`](INTEGRATION.md).** It is written to be executed without further
+context.
+
 ## Contents
 
 | Path | Role | How it is reused |
 |---|---|---|
+| `INTEGRATION.md` | step-by-step adoption guide written for an agent | read and executed inside the target repository |
 | `AGENTS.md` | operating rules for agents | copied into each repository root |
 | `.releaserc.json` | semantic-release configuration | copied once, then extended per repository |
 | `.github/workflows/release.yml` | the release pipeline: version, tag, GitHub release — no build | **called** as a reusable workflow, never copied |
