@@ -96,6 +96,33 @@ Rust, `dpkg-buildpackage` for Debian-native packages, `tar` for plain archives,
 Gradle and RubyGems; deb and rpm have to go to the release assets or to a separate
 apt or yum repository.
 
+## Verified behaviour
+
+A sandbox repository exercised the whole flow end to end. Confirmed:
+
+- `chore:`, `docs:`, `ci:` merges release nothing and skip `publish`/`package`;
+  `feat:` → minor, `fix:` → patch, `feat:` plus a `BREAKING CHANGE:` footer → major.
+- The first release of an untagged repository is `1.0.0`.
+- Release notes are generated from the merged PR, and the `package` job's artifact
+  is attached to the release.
+- The release job adds no commit to the default branch.
+
+Two GitHub settings decide how a PR becomes the release commit. Both are defaults,
+and both are easy to get wrong:
+
+- **`squash_merge_commit_title` = `COMMIT_OR_PR_TITLE`** — a **single-commit** PR
+  puts the *commit message* on the default branch and ignores the PR title; a
+  multi-commit PR puts the *PR title*. Keep the PR title identical to the commit
+  subject and neither case can be wrong.
+- **`squash_merge_commit_message` = `COMMIT_MESSAGES`** — the PR's commit messages
+  are carried into the squash commit, the PR **description is not**. A
+  `BREAKING CHANGE:` footer written only in the PR description is dropped, and the
+  change ships as a minor bump instead of a major one.
+
+The repository's default workflow permissions may be read-only; that does not
+block releases, because the caller sets `permissions:` explicitly and the job log
+then reports `Contents: write`.
+
 ## Keeping repositories up to date
 
 - **Release pipeline** — nothing to do. Callers pin `@v1`, so a fix here reaches

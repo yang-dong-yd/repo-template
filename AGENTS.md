@@ -53,7 +53,8 @@ Every commit message follows Conventional Commits:
 ### Pull Requests
 
 - Push the branch and open a PR with `gh pr create`.
-- **PR title must follow the same commit convention**, because squash merge uses it as the final commit on `<default-branch>`. Example: `fix: prevent null pointer on logout`.
+- **The commit message is what lands, and therefore what the release reads.** Under GitHub's default squash settings a single-commit PR puts the *commit message* on `<default-branch>` and ignores the PR title, while a multi-commit PR puts the *PR title*. Make the PR title identical to the commit subject so neither case can be wrong.
+- Put `BREAKING CHANGE:` in the commit footer, never only in the PR description. A squash merge carries the PR's commit messages into the result but not its description, so a breaking change noted only in the description ships as a minor bump.
 - PR body must contain:
   - **Summary** — what this changes and why.
   - **Changes** — bullet list of the concrete edits.
@@ -66,7 +67,7 @@ Every commit message follows Conventional Commits:
 
 - Repository owners merge with **squash and merge** only (`gh pr merge --squash`), producing exactly one commit on `<default-branch>`.
 - Never use a merge commit or rebase merge. Never push directly to `<default-branch>`.
-- Before merging, the PR title must be a valid Conventional Commit message and the CI must be green.
+- Before merging, the commit messages and the PR title must both be valid Conventional Commit messages, and the CI must be green.
 - Delete the source branch after merging.
 
 ## 2. Testing
