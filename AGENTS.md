@@ -45,6 +45,7 @@ Every commit message follows Conventional Commits:
 - One issue per problem. Do not bundle unrelated work; link related issues instead.
 - Reference the issue in commits and in the PR body. Use a closing keyword (`Closes #123`, `Fixes #123`, `Resolves #123`) only when the PR fully resolves it; otherwise use `Refs #123`.
 - Let the merge close the issue. Do not close it by hand first; verify it is closed after merge.
+- A PR links to an issue and closes it automatically only when the PR targets `<default-branch>`; a PR targeting any other branch links nothing and closes nothing.
 - Never edit, close, reopen, reassign, or label an issue without explicit user approval. Never rewrite someone else's issue text; comment instead.
 
 ### Pull Requests
