@@ -80,11 +80,10 @@ Every commit message follows Conventional Commits:
 
 ## 3. Versioning and Releases
 
-- Releases are automated with semantic-release driven by the commit prefixes on `<default-branch>`.
-- **Never edit version numbers, `CHANGELOG.md`, git tags, or GitHub releases by hand.**
-- The release level is determined by the merged commit prefix: `feat` → minor, `fix`/`perf` → patch, `BREAKING CHANGE:` → major.
-- Therefore commit and PR prefixes must be accurate. An incorrect prefix ships an incorrect version.
-- Never create or push tags manually.
+- Releases are automated by the `Auto Semantic Release` workflow (`.github/workflows/main.yml`): it reads the commit prefixes on `<default-branch>`, pushes the next tag, and creates the GitHub release. Version analysis follows semantic-release's commit analyzer.
+- The release level is determined by the merged commit prefix: `feat` → minor, `fix`/`perf` → patch, `BREAKING CHANGE:` → major. Every other type (`docs`, `style`, `refactor`, `test`, `build`, `ci`, `chore`) produces no release. An incorrect prefix therefore ships an incorrect version.
+- **A repository with no tag at all never produces a first release**, because the workflow has no baseline to compare against. Push a `v0.0.0` tag once when the repository is created, before the first feature merge.
+- Apart from that one-time baseline, **never create or push tags, edit version numbers, `CHANGELOG.md`, or GitHub releases by hand**. The workflow owns them.
 
 ## 4. Required Tooling
 
