@@ -1,7 +1,8 @@
 name: Release Self
 
 # Dogfooding: this repository releases itself through the same reusable workflow
-# that downstream repositories call. Each release produces the tags they pin to.
+# that downstream repositories call, then keeps the movable `v1` tag they pin to
+# pointing at the newest release.
 
 on:
   push:
@@ -23,3 +24,29 @@ jobs:
     uses: ./.github/workflows/release.yml
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # Callers pin `@v1`; without this, every release would need a manual force-push
+  # and a forgotten one would silently pin downstream repositories to old logic.
+  major-tag:
+    needs: release
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Point the major tag at the newest release
+        run: |
+          set -euo pipefail
+          tag="$(git tag --points-at HEAD --list 'v[0-9]*.[0-9]*.[0-9]*' | sort -V | tail -1)"
+          if [[ -z "$tag" ]]; then
+            echo "no release tag on this commit; leaving the major tag alone"
+            exit 0
+          fi
+          major="${tag%%.*}"
+          git tag -f "$major" "$tag"
+          git push -f origin "$major"
+          echo "moved $major to $tag"

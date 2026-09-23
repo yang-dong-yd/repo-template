@@ -46,14 +46,12 @@ squash. If the repository publishes to npm, add `@semantic-release/npm` to its
 ## The `v1` tag
 
 semantic-release publishes immutable `vX.Y.Z` tags. Reusable workflow callers need
-a stable ref, so keep a movable `v1` tag pointing at the latest release:
-
-```bash
-git tag -f v1 v1.0.0 && git push -f origin v1
-```
+a stable ref, so `release-self.yml` keeps a movable `v1` tag pointing at the newest
+release (the first one was created by hand when this repository was bootstrapped).
 
 A movable tag means whoever can push tags here can change what every downstream
-repository runs. If that is unacceptable, pin commit SHAs instead of `v1`.
+repository runs. If that is unacceptable, pin commit SHAs in the caller stubs
+instead of `v1`, and let Dependabot open the bump PRs.
 
 ## Ground rules
 
