@@ -4,7 +4,7 @@ Operating rules for agents working in this repository. They are mandatory, not a
 
 ## 1. Git Workflow
 
-These rules assume the repository is hosted on GitHub. Where it has no GitHub remote, the GitHub-specific steps (PRs, issues, releases) do not apply.
+These rules assume the repository is hosted on GitHub. Where it has no GitHub remote, the GitHub-specific steps (PRs, issues, releases) do not apply; branching, commit, and testing rules apply to every Git repository.
 
 **Never modify code directly on the default branch.** Always create a new branch first.
 
