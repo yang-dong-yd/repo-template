@@ -1,0 +1,66 @@
+# A job fragment, not a workflow. Paste it into the `jobs:` map of the repository's
+# `.github/workflows/release.yml`, next to the `release` job, when the repository
+# publishes to a package registry (npm, PyPI, crates.io, a container registry...).
+# Repositories that publish nothing simply omit it.
+#
+# `needs.release.outputs.new_tag` is empty when the merge contained no feat/fix, so
+# this job is skipped and nothing is republished.
+
+  publish:
+    needs: release
+    if: needs.release.outputs.new_tag != ''
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write # npm provenance and other OIDC-based registries
+    env:
+      VERSION: ${{ needs.release.outputs.new_tag }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # ---------------------------------------------------------------- npm
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 22
+      #     registry-url: https://registry.npmjs.org
+      # - run: |
+      #     npm ci
+      #     npm version "${VERSION#v}" --no-git-tag-version
+      #     npm publish --provenance
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      #
+      # ------------------------------------------------------------- Python
+      # - uses: actions/setup-python@v5
+      #   with:
+      #     python-version: "3.12"
+      # - run: |
+      #     python -m pip install build twine
+      #     sed -i "s/^version = .*/version = \"${VERSION#v}\"/" pyproject.toml
+      #     python -m build
+      #     twine upload dist/*
+      #   env:
+      #     TWINE_USERNAME: __token__
+      #     TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      #
+      # --------------------------------------------------------------- Rust
+      # - run: |
+      #     cargo install cargo-edit
+      #     cargo set-version "${VERSION#v}"
+      #     cargo publish
+      #   env:
+      #     CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      #
+      # ------------------------------------------------- Docker / anything else
+      # - run: |
+      #     echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      #     docker build -t ghcr.io/${{ github.repository }}:"${VERSION#v}" .
+      #     docker push ghcr.io/${{ github.repository }}:"${VERSION#v}"
+
+      # Until this is replaced the job fails on purpose: a release that reports
+      # success while shipping nothing is worse than a red run.
+      - name: No publish step configured yet
+        run: |
+          echo "::error::this repository released ${VERSION} but has no publish step; add one or delete the job"
+          exit 1

@@ -14,9 +14,10 @@ pipeline (semantic-release, driven by Conventional Commit prefixes).
 | `.releaserc.json` | semantic-release configuration | copied once, then extended per repository |
 | `.github/workflows/release.yml` | the release pipeline: version, tag, GitHub release — no build | **called** as a reusable workflow, never copied |
 | `.github/workflows/release-self.yml` | releases this repository itself | stays here |
-| `examples/caller-release.yml` | the caller stub | copied once into each repository |
+| `examples/caller-release.yml` | the caller stub, source-only | copied once into each repository |
+| `examples/publish.yml` | job fragment for publishing to a registry | pasted into a repository's `release.yml` when it publishes |
 | `examples/ci.yml` | minimal pull request gate: build and test | copied once into each repository |
-| `examples/package.yml` | job fragment that builds artifacts and attaches them to the release | pasted into a repository's `release.yml` |
+| `examples/package.yml` | job fragment that builds artifacts and attaches them to the release | pasted into a repository's `release.yml` when it ships artifacts |
 | `scripts/sync.sh` | syncs the copied files and opens a PR | run from here |
 
 ## Adopting in a new repository
@@ -33,10 +34,20 @@ Or click **Use this template** on the repository page.
 scripts/sync.sh ../some-repo
 ```
 
-This copies `AGENTS.md`, adds `.releaserc.json` and the release workflow when they
-are missing, pushes a branch, and opens a PR. Review the diff and merge it with
-squash. Then fill in the `publish` job of `.github/workflows/release.yml` for that
-repository's language, or delete the job if it publishes nothing.
+This copies `AGENTS.md`, adds `.releaserc.json` and a source-only release workflow
+when they are missing, pushes a branch, and opens a PR. Review the diff and merge
+it with squash. Then add the jobs the repository actually needs:
+
+| The repository ships | Jobs in its `.github/workflows/release.yml` |
+|---|---|
+| nothing but source | `release` — GitHub attaches the source tarball and zip itself |
+| a registry package (npm, PyPI, crates.io) | `release` + `publish` from `examples/publish.yml` |
+| build artifacts on the release (deb, rpm, tarball, image) | `release` + `package` from `examples/package.yml` |
+| both | `release` + `publish` + `package` |
+
+The jobs are independent siblings, each gated on
+`needs.release.outputs.new_tag != ''`, so adding or deleting one never rewires the
+others. Repositories that ship nothing keep the stub exactly as synced.
 
 ## Releasing and publishing are separate
 
