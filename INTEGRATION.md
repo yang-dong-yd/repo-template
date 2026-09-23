@@ -22,16 +22,18 @@ real, not theoretical.
 ## 1. Fetch the template (disposable)
 
 ```bash
-gh repo clone yang-dong-yd/repo-template /tmp/repo-template -- --depth 1
+gh repo clone yang-dong-yd/repo-template ../repo-template -- --depth 1
 ```
 
-Do not clone it inside the target repository.
+Use a **sibling directory** of the target repository. Do not clone inside the
+target repository (the sync commit stages everything with `git add -A`), and do
+not use `/tmp`: some agent sandboxes do not persist it between commands.
 
 ## 2. Install the standards
 
 ```bash
 cd /path/to/target-repo
-/tmp/repo-template/scripts/sync.sh .
+../repo-template/scripts/sync.sh .
 ```
 
 This creates the branch `chore/sync-repo-standards`, copies `AGENTS.md`, and adds
@@ -49,7 +51,7 @@ going on: the `branches` list in `.releaserc.json` and `on.push.branches` in
 ## 3. Add the test gate
 
 ```bash
-cp /tmp/repo-template/examples/ci.yml .github/workflows/ci.yml
+cp ../repo-template/examples/ci.yml .github/workflows/ci.yml
 ```
 
 Then replace the two placeholders with this repository's own toolchain and test
@@ -76,8 +78,8 @@ Paste the relevant job from the template into **this repository's own**
 
 | The repository ships | Job to paste | Source |
 |---|---|---|
-| a registry package (npm, PyPI, crates.io) | `publish` | `/tmp/repo-template/examples/publish.yml` |
-| build artifacts on the release (deb, rpm, tarball, image) | `package` | `/tmp/repo-template/examples/package.yml` |
+| a registry package (npm, PyPI, crates.io) | `publish` | `../repo-template/examples/publish.yml` |
+| build artifacts on the release (deb, rpm, tarball, image) | `package` | `../repo-template/examples/package.yml` |
 | nothing but source | none — delete nothing, change nothing | — |
 
 Fill in the build/publish steps and replace their `exit 1` placeholders. Registry
@@ -163,8 +165,8 @@ gh api repos/{owner}/{repo}/releases/{id}/assets   # per-release endpoint, see g
 ## Updating later
 
 ```bash
-git -C /tmp/repo-template pull --ff-only || gh repo clone yang-dong-yd/repo-template /tmp/repo-template
-/tmp/repo-template/scripts/sync.sh /path/to/target-repo
+git -C ../repo-template pull --ff-only || gh repo clone yang-dong-yd/repo-template ../repo-template
+../repo-template/scripts/sync.sh /path/to/target-repo
 ```
 
 `AGENTS.md` is overwritten with the canonical version; `.releaserc.json` and the
