@@ -34,6 +34,19 @@ Every commit message follows Conventional Commits:
 - One logical change per commit. Do not mix refactoring with behavior changes.
 - Never commit generated artifacts, secrets, credentials, or local config.
 
+### Issues
+
+- Search before creating: `gh issue list --search "<keywords>"`. Never open a duplicate.
+- Read the full issue and all its comments before starting; check for a linked PR to avoid repeating work.
+- Create issues with `gh issue create`. Title: short, imperative, no trailing period.
+  - Bug body: **Context**, **Expected**, **Actual**, **Reproduce**.
+  - Feature body: **Problem**, **Proposal**, **Alternatives**.
+- Use only labels that already exist in the repository. Never invent or create labels.
+- One issue per problem. Do not bundle unrelated work; link related issues instead.
+- Reference the issue in commits and in the PR body. Use a closing keyword (`Closes #123`, `Fixes #123`, `Resolves #123`) only when the PR fully resolves it; otherwise use `Refs #123`.
+- Let the merge close the issue. Do not close it by hand first; verify it is closed after merge.
+- Never edit, close, reopen, reassign, or label an issue without explicit user approval. Never rewrite someone else's issue text; comment instead.
+
 ### Pull Requests
 
 - Push the branch and open a PR with `gh pr create`.
