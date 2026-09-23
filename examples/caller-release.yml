@@ -1,0 +1,26 @@
+# Copy this file into a downstream repository as `.github/workflows/release.yml`.
+# `scripts/sync.sh` does that automatically when the file does not exist yet.
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write # create the tag and the GitHub release
+  issues: write # comment on released issues
+  pull-requests: write # comment on released pull requests
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false # never cancel a release mid-flight
+
+jobs:
+  release:
+    # Pin to a moving major tag (`@v1`), or to a commit SHA for maximum safety.
+    # The tag must exist in the template repository (see its README).
+    uses: yang-dong-yd/repo-template/.github/workflows/release.yml@v1
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }} # only for npm publishers; delete otherwise

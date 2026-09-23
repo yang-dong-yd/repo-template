@@ -1,0 +1,25 @@
+name: Release Self
+
+# Dogfooding: this repository releases itself through the same reusable workflow
+# that downstream repositories call. Each release produces the tags they pin to.
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write # create the tag and the GitHub release
+  issues: write # comment on released issues
+  pull-requests: write # comment on released pull requests
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false # never cancel a release mid-flight
+
+jobs:
+  release:
+    uses: ./.github/workflows/release.yml
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

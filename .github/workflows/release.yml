@@ -1,19 +1,30 @@
 name: Release
 
+# Reusable release workflow. Downstream repositories call this instead of copying
+# the release logic, so a fix here reaches every repository at once.
+#
+# Caller (see examples/caller-release.yml):
+#
+#   jobs:
+#     release:
+#       permissions:
+#         contents: write
+#         issues: write
+#         pull-requests: write
+#       uses: <owner>/repo-template/.github/workflows/release.yml@v1
+#       secrets:
+#         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
 on:
-  push:
-    branches:
-      - main
-      - master
+  workflow_call:
+    secrets:
+      NPM_TOKEN:
+        required: false # only repositories that publish to npm define this
 
 permissions:
   contents: write # create the tag and the GitHub release
   issues: write # comment on released issues
   pull-requests: write # comment on released pull requests
-
-concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: false # never cancel a release mid-flight
 
 jobs:
   release:
@@ -33,4 +44,5 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx --yes semantic-release@25
