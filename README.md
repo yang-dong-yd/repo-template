@@ -28,7 +28,7 @@ context.
 ## Adopting in a new repository
 
 ```bash
-gh repo create <owner>/<name> --public --template yang-dong-yd/repo-template
+gh repo create <owner>/<name> --public --template nexform-tech/repo-template
 ```
 
 Or click **Use this template** on the repository page.
