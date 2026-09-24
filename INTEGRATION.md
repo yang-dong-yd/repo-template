@@ -1,7 +1,7 @@
 # Integration guide (for agents)
 
 You are an agent working inside another repository. Your task is to apply the
-standards from `yang-dong-yd/repo-template` to **this** repository. Follow the
+standards from `nexform-tech/repo-template` to **this** repository. Follow the
 steps in order and do the work through a pull request.
 
 Everything here was verified in a sandbox repository; the gotchas at the end are
@@ -22,7 +22,7 @@ real, not theoretical.
 ## 1. Fetch the template (disposable)
 
 ```bash
-gh repo clone yang-dong-yd/repo-template ../repo-template -- --depth 1
+gh repo clone nexform-tech/repo-template ../repo-template -- --depth 1
 ```
 
 Use a **sibling directory** of the target repository. Do not clone inside the
@@ -165,7 +165,7 @@ gh api repos/{owner}/{repo}/releases/{id}/assets   # per-release endpoint, see g
 ## Updating later
 
 ```bash
-git -C ../repo-template pull --ff-only || gh repo clone yang-dong-yd/repo-template ../repo-template
+git -C ../repo-template pull --ff-only || gh repo clone nexform-tech/repo-template ../repo-template
 ../repo-template/scripts/sync.sh /path/to/target-repo
 ```
 
